@@ -31,3 +31,5 @@
 2. Установите зависимости: `pip install -r requirements.txt`
 3. *Для Windows:* Установите [GTK3 Runtime](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
 4. Запустите `python main.py`
+
+внимание это нейрослоп. 🧼🫧
