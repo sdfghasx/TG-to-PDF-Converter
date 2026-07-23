@@ -2,7 +2,7 @@
 
 Десктопный инструмент для конвертации JSON-экспортов из Telegram в красивые, структурированные PDF-отчеты. 
 
-<img width="917" height="1079" alt="image" src="https://github.com/user-attachments/assets/192f8d87-0a7c-4af7-8ab8-2d5eec53afca" />
+<img width="916" height="1079" alt="image" src="https://github.com/user-attachments/assets/6c67d309-9b61-4417-a135-5c85f9cad8c8" />
 
 Приложение генерирует не просто текст, а полноценный типографский документ с оглавлением, графиками активности, облаком слов и умными ссылками.
 
