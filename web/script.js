@@ -10,6 +10,9 @@ const logArea = document.getElementById('log-area');
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const calcResult = document.getElementById('calc-result');
+const checkOnlyMd = document.getElementById('check-only-md');
+
+let isProcessing = false;
 
 function checkReady() { btnStart.disabled = !(inputJson.value && inputPdf.value); }
 
@@ -69,9 +72,7 @@ btnCalc.addEventListener('click', async () => {
     if (!inputJson.value) { alert("Сначала выберите JSON файл!"); return; }
     btnCalc.style.opacity = '0.5';
     
-    // Берем размер шрифта для точного расчета
     const sizeVal = document.getElementById('wrapper-size').getAttribute('data-value');
-    
     let res = await eel.calculate_volume(inputJson.value, dateFrom.value, dateTo.value, sizeVal)();
     btnCalc.style.opacity = '1';
     
@@ -83,10 +84,28 @@ btnCalc.addEventListener('click', async () => {
     }
 });
 
+checkOnlyMd.addEventListener('change', () => {
+    if (!isProcessing) {
+        btnStart.innerText = checkOnlyMd.checked ? "Собрать ТОЛЬКО .md" : "Собрать PDF";
+    }
+});
+
 btnStart.addEventListener('click', () => {
-    btnStart.disabled = true; btnJson.disabled = true; btnPdf.disabled = true;
+    if (isProcessing) {
+        eel.cancel_process()();
+        btnStart.disabled = true;
+        btnStart.innerText = "Останавливаем...";
+        return;
+    }
+
+    isProcessing = true;
+    btnJson.disabled = true; btnPdf.disabled = true;
+    
+    btnStart.style.background = "var(--danger)";
+    btnStart.innerHTML = "✖ Отменить";
+    
     logArea.value = "> Инициализация сборки...\n";
-    statusDot.className = "dot pulsing"; statusText.innerText = "Генерация PDF...";
+    statusDot.className = "dot pulsing"; statusText.innerText = "Работаем...";
     
     const fontVal = document.getElementById('wrapper-font').getAttribute('data-value');
     const sizeVal = document.getElementById('wrapper-size').getAttribute('data-value');
@@ -99,15 +118,30 @@ btnStart.addEventListener('click', () => {
     const showWordcloud = document.getElementById('check-wordcloud').checked;
     const showToc = document.getElementById('check-toc').checked;
     const showLinks = document.getElementById('check-links').checked;
+    const createMd = document.getElementById('check-md').checked;
+    const onlyMd = checkOnlyMd.checked;
     
     eel.start_conversion(
         inputJson.value, inputPdf.value, 
         dateFrom.value, dateTo.value, 
         fontVal, sizeVal, theme, 
-        showMedia, showTop, showWatermark, showCharts, showWordcloud, showToc, showLinks
+        showMedia, showTop, showWatermark, showCharts, showWordcloud, showToc, showLinks, createMd, onlyMd
     )();
 });
 
 eel.expose(addLog); function addLog(msg) { logArea.value += msg + "\n"; logArea.scrollTop = logArea.scrollHeight; }
 eel.expose(updateStatus); function updateStatus(status, text, color) { statusDot.className = "dot " + status; statusText.innerText = text; statusText.style.color = color || "var(--text-muted)"; }
-eel.expose(enableButton); function enableButton() { btnStart.disabled = false; btnJson.disabled = false; btnPdf.disabled = false; }
+
+eel.expose(enableButton); 
+function enableButton() { 
+    isProcessing = false;
+    btnStart.disabled = false; btnJson.disabled = false; btnPdf.disabled = false;
+    btnStart.style.background = ""; 
+    btnStart.innerText = checkOnlyMd.checked ? "Собрать ТОЛЬКО .md" : "Собрать PDF";
+}
+
+eel.expose(showFinalTime); 
+function showFinalTime(timeStr) { 
+    calcResult.style.display = 'block';
+    calcResult.innerHTML += `<br><span style="color: var(--success); margin-top: 5px; display: inline-block;">⏱ <b>Время генерации:</b> ${timeStr}</span>`;
+}
